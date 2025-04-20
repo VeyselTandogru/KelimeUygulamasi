@@ -63,7 +63,6 @@ class _AccordionItemState extends State<AccordionItem> {
             ),
           ),
         ),
-        const Divider(height: 1),
       ],
     );
   }

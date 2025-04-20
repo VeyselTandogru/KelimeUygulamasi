@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../utils/app_colors.dart';
+import '../routes/app_routes.dart';
+import '../widgets/app_scaffold.dart';
 
 class WordRepeatScreen extends StatefulWidget {
   const WordRepeatScreen({super.key});
@@ -67,7 +69,10 @@ class _WordRepeatScreenState extends State<WordRepeatScreen> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                Navigator.of(context).pop(); // Ana sayfaya dön
+                Navigator.pushReplacementNamed(
+                  context,
+                  AppRoutes.home,
+                ); // Route kullanarak ana sayfaya dön
               },
               child: const Text('Ana Sayfaya Dön'),
             ),
@@ -90,8 +95,9 @@ class _WordRepeatScreenState extends State<WordRepeatScreen> {
   @override
   Widget build(BuildContext context) {
     final currentWord = words[currentIndex];
-    return Scaffold(
-      appBar: AppBar(title: const Text('Kelime Tekrarı')),
+    return AppScaffold(
+      title: 'Kelime Tekrarı',
+      currentIndex: 2, // Tekrar sekmesi seçili
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

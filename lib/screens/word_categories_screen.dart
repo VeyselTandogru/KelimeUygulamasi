@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../utils/app_colors.dart';
-import '../main.dart';
+import '../routes/app_routes.dart';
+import '../services/categories_service.dart';
+import '../widgets/app_scaffold.dart';
 
 class WordCategoriesScreen extends StatefulWidget {
   const WordCategoriesScreen({super.key});
@@ -10,6 +12,9 @@ class WordCategoriesScreen extends StatefulWidget {
 }
 
 class _WordCategoriesScreenState extends State<WordCategoriesScreen> {
+  // Kategori servisi
+  final CategoriesService _categoriesService = CategoriesService();
+
   // Kategori listesi
   final List<Map<String, dynamic>> categories = [
     {
@@ -56,6 +61,34 @@ class _WordCategoriesScreenState extends State<WordCategoriesScreen> {
     },
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedCategories();
+  }
+
+  // Kaydedilmiş kategori seçimlerini yükle
+  Future<void> _loadSavedCategories() async {
+    final selectedNames = await _categoriesService.getSelectedCategories();
+
+    // Mevcut listedeki kategorileri kayıtlı seçimlere göre güncelle
+    if (selectedNames.isNotEmpty) {
+      setState(() {
+        for (var i = 0; i < categories.length; i++) {
+          final categoryName = categories[i]['name'] as String;
+          if (selectedNames.contains(categoryName)) {
+            categories[i]['isSelected'] = true;
+          }
+        }
+      });
+    }
+  }
+
+  // Kategori seçimlerini kaydet
+  void _saveSelectedCategories() {
+    _categoriesService.saveSelectedCategories(categories);
+  }
+
   int get selectedCount => categories.where((cat) => cat['isSelected']).length;
   int get totalWordCount {
     int total = 0;
@@ -70,25 +103,17 @@ class _WordCategoriesScreenState extends State<WordCategoriesScreen> {
   void toggleCategory(int index) {
     setState(() {
       categories[index]['isSelected'] = !categories[index]['isSelected'];
+      // Seçim değiştiğinde kaydet
+      _saveSelectedCategories();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Kelime Grupları'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            // Ana sayfaya dön
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (context) => const MainScreen()),
-              (route) => false, // Tüm önceki sayfaları kaldır
-            );
-          },
-        ),
-      ),
+    return AppScaffold(
+      title: 'Kelime Grupları',
+      currentIndex: 0, // Ana sayfa sekmesi seçili
+      showBackButton: true,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -134,6 +159,7 @@ class _WordCategoriesScreenState extends State<WordCategoriesScreen> {
                             backgroundColor: AppColors.primary,
                           ),
                         );
+                        Navigator.pushNamed(context, AppRoutes.home);
                       }
                       : null,
               child: Padding(

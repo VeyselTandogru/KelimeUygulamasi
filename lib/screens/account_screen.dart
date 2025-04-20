@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:ingilizce_ogrenme_uygulamasi/screens/word_categories_screen.dart';
 import 'package:provider/provider.dart';
 import '../widgets/accordion_item.dart';
 import '../models/theme_model.dart';
 import '../utils/app_constants.dart';
+import '../routes/app_routes.dart';
+import '../widgets/app_scaffold.dart';
 import 'about_screen.dart';
 import '../main.dart'; // NavigationUtil'i içe aktaralım
+import '../providers/statistics_provider.dart'; // StatisticsProvider eklendi
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -16,18 +18,34 @@ class AccountScreen extends StatefulWidget {
 
 class _AccountScreenState extends State<AccountScreen> {
   // Örnek kullanıcı bilgileri
-  String username = 'hamza';
+  String username = 'Ikren';
   String email = 'hamza@example.com';
   int dailyGoal = 5;
   String levelCode = 'A2';
+
+  @override
+  void initState() {
+    super.initState();
+    // StatisticsProvider'dan günlük hedefi yükle
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final statisticsProvider = Provider.of<StatisticsProvider>(
+        context,
+        listen: false,
+      );
+      setState(() {
+        dailyGoal = statisticsProvider.statistics.dailyGoal;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final textTheme = Theme.of(context).textTheme;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Hesabım')),
+    return AppScaffold(
+      title: 'Hesabım',
+      currentIndex: 3, // Hesap sekmesi seçili
       body: SingleChildScrollView(
         child: Padding(
           padding: AppConstants.paddingAllMedium,
@@ -75,6 +93,7 @@ class _AccountScreenState extends State<AccountScreen> {
                       ],
                     ),
                   ),
+                  const Divider(height: 1),
 
                   AccordionItem(
                     title: 'E-posta Adresi',
@@ -149,7 +168,17 @@ class _AccountScreenState extends State<AccountScreen> {
                         SizedBox(height: AppConstants.paddingMedium),
                         ElevatedButton(
                           onPressed: () {
-                            // Günlük hedefi kaydet
+                            // StatisticsProvider'ı kullanarak günlük hedefi güncelle
+                            final statisticsProvider =
+                                Provider.of<StatisticsProvider>(
+                                  context,
+                                  listen: false,
+                                );
+
+                            // Günlük hedefi güncelle
+                            statisticsProvider.updateDailyGoal(dailyGoal);
+
+                            // Kullanıcıya bilgi mesajı göster
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: const Text('Günlük hedef kaydedildi'),
@@ -163,77 +192,14 @@ class _AccountScreenState extends State<AccountScreen> {
                     ),
                   ),
 
-                  AccordionItem(
-                    title: 'Dil Seviyesi',
-                    iconData: Icons.trending_up,
-                    expandedContent: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'İngilizce dil seviyenizi seçin:',
-                          style: textTheme.bodyLarge,
-                        ),
-                        SizedBox(height: AppConstants.paddingSmall),
-                        DropdownButton<String>(
-                          value: levelCode,
-                          isExpanded: true,
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'A1',
-                              child: Text('A1 (Başlangıç)'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'A2',
-                              child: Text('A2 (Temel)'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'B1',
-                              child: Text('B1 (Orta-Altı)'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'B2',
-                              child: Text('B2 (Orta)'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'C1',
-                              child: Text('C1 (İleri)'),
-                            ),
-                          ],
-                          onChanged: (value) {
-                            setState(() {
-                              levelCode = value!;
-                            });
-                          },
-                        ),
-                        SizedBox(height: AppConstants.paddingMedium),
-                        ElevatedButton(
-                          onPressed: () {
-                            // Dil seviyesini kaydet
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: const Text('Dil seviyesi kaydedildi'),
-                                backgroundColor: AppConstants.successColor,
-                              ),
-                            );
-                          },
-                          child: const Text('Kaydet'),
-                        ),
-                      ],
-                    ),
-                  ),
+                  const Divider(height: 1),
 
                   _buildMenuItemWithIcon(
                     'Kelime Grupları',
                     Icons.layers,
                     onTap: () {
                       // Kelime grupları sayfasına git
-
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => WordCategoriesScreen(),
-                        ),
-                      );
+                      Navigator.pushNamed(context, AppRoutes.wordCategories);
                     },
                   ),
                 ],
@@ -297,12 +263,8 @@ class _AccountScreenState extends State<AccountScreen> {
                     'Uygulamamız Hakkında',
                     Icons.info,
                     onTap: () {
-                      // Alt navigasyon çubuğunu göstererek Hakkında sayfasına git
-                      NavigationUtil.navigateWithBottomBar(
-                        context,
-                        const AboutScreen(),
-                        selectedTab: 3, // Account sekmesi seçili olsun
-                      );
+                      // Route kullanarak Hakkında sayfasına git
+                      Navigator.pushNamed(context, AppRoutes.about);
                     },
                   ),
                 ],

@@ -26,7 +26,7 @@ class BottomNavigation extends StatelessWidget {
       selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
       unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
       items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'İstatistik'),
+        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'An Sayfa'),
         BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Öğrenme'),
         BottomNavigationBarItem(icon: Icon(Icons.refresh), label: 'Tekrar'),
         BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Hesabım'),

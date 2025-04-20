@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:ingilizce_ogrenme_uygulamasi/screens/account_screen.dart';
+
 import '../utils/app_colors.dart';
+import '../routes/app_routes.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -13,10 +14,7 @@ class AboutScreen extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const AccountScreen()),
-            );
+            Navigator.pushReplacementNamed(context, AppRoutes.account);
           },
         ),
       ),

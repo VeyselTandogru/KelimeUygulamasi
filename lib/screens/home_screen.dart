@@ -5,7 +5,8 @@ import 'package:provider/provider.dart';
 import '../utils/app_colors.dart';
 import '../screens/word_repeat_screen.dart';
 import '../screens/word_categories_screen.dart';
-import '../main.dart'; // NavigationUtil'i içe aktaralım
+import '../routes/app_routes.dart';
+import '../widgets/app_scaffold.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -34,8 +35,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final statistics = statisticsProvider.statistics;
     final isLoading = statisticsProvider.isLoading;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Ana Sayfa')),
+    return AppScaffold(
+      title: 'Ana Sayfa',
+      currentIndex: 0, // Ana sayfa sekmesi seçili
       body:
           isLoading
               ? const Center(child: CircularProgressIndicator())
@@ -57,14 +59,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               'Kelime Grupları',
                               Icons.layers,
                               onTap: () {
-                                // Alt navigasyon çubuğunu göstererek Kelime Grupları sayfasına git
-                                Navigator.push(
+                                // Route kullanarak kategoriler sayfasına git
+                                Navigator.pushNamed(
                                   context,
-                                  MaterialPageRoute(
-                                    builder:
-                                        (context) =>
-                                            const WordCategoriesScreen(),
-                                  ),
+                                  AppRoutes.wordCategories,
                                 );
                               },
                             ),
@@ -73,12 +71,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               'Yeni Kelime Öğren',
                               Icons.add_circle_outline,
                               onTap: () {
-                                Navigator.push(
+                                // Route kullanarak kelime öğrenme sayfasına git
+                                Navigator.pushNamed(
                                   context,
-                                  MaterialPageRoute(
-                                    builder:
-                                        (context) => const WordLearnScreen(),
-                                  ),
+                                  AppRoutes.wordLearn,
                                 );
                               },
                             ),
@@ -87,13 +83,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               'Kelimeleri Tekrarla',
                               Icons.refresh,
                               onTap: () {
-                                // Kelime tekrar sayfasına git
-                                Navigator.push(
+                                // Route kullanarak kelime tekrarlama sayfasına git
+                                Navigator.pushNamed(
                                   context,
-                                  MaterialPageRoute(
-                                    builder:
-                                        (context) => const WordRepeatScreen(),
-                                  ),
+                                  AppRoutes.wordRepeat,
                                 );
                               },
                             ),

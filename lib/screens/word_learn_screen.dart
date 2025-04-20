@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/word_model.dart';
 import '../utils/app_constants.dart';
 import '../providers/statistics_provider.dart';
+import '../widgets/app_scaffold.dart';
 
 class WordLearnScreen extends StatefulWidget {
   const WordLearnScreen({super.key});
@@ -42,8 +43,9 @@ class _WordLearnScreenState extends State<WordLearnScreen> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Kelime Öğren')),
+    return AppScaffold(
+      title: 'Kelime Öğren',
+      currentIndex: 1, // Öğrenme sekmesi seçili
       body: SingleChildScrollView(
         child: Padding(
           padding: AppConstants.paddingAllMedium,
