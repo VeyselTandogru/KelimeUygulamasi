@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/word_model.dart';
 import '../utils/app_constants.dart';
+import '../providers/statistics_provider.dart';
 
 class WordLearnScreen extends StatefulWidget {
   const WordLearnScreen({super.key});
@@ -41,15 +43,7 @@ class _WordLearnScreenState extends State<WordLearnScreen> {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Kelime Öğren'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
+      appBar: AppBar(title: const Text('Kelime Öğren')),
       body: SingleChildScrollView(
         child: Padding(
           padding: AppConstants.paddingAllMedium,
@@ -178,7 +172,24 @@ class _WordLearnScreenState extends State<WordLearnScreen> {
                       icon: const Icon(Icons.arrow_forward),
                       label: const Text('Bunu öğrenmeliyim'),
                       onPressed: () {
-                        // İşlem
+                        // İstatistikleri güncelle
+                        Provider.of<StatisticsProvider>(
+                          context,
+                          listen: false,
+                        ).incrementLearnedWordCount();
+
+                        // Kullanıcıya bilgi mesajı göster
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Kelime öğrenildi ve istatistikleriniz güncellendi!',
+                            ),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+
+                        // Sonraki kelimeye geçmek için burada ekstra bir şey yapılabilir
+                        // Şimdilik aynı kelimeyle devam ediyoruz
                       },
                     ),
                   ),

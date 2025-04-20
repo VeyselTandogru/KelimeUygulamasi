@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../utils/app_colors.dart';
+import '../main.dart';
 
 class WordCategoriesScreen extends StatefulWidget {
   const WordCategoriesScreen({super.key});
@@ -79,7 +80,13 @@ class _WordCategoriesScreenState extends State<WordCategoriesScreen> {
         title: const Text('Kelime Grupları'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            // Ana sayfaya dön
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const MainScreen()),
+              (route) => false, // Tüm önceki sayfaları kaldır
+            );
+          },
         ),
       ),
       body: Column(

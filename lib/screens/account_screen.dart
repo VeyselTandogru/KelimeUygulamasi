@@ -27,15 +27,7 @@ class _AccountScreenState extends State<AccountScreen> {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Hesabım'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
+      appBar: AppBar(title: const Text('Hesabım')),
       body: SingleChildScrollView(
         child: Padding(
           padding: AppConstants.paddingAllMedium,

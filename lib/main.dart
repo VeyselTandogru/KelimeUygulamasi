@@ -4,15 +4,17 @@ import 'screens/home_screen.dart';
 import 'screens/word_learn_screen.dart';
 import 'screens/word_repeat_screen.dart';
 import 'screens/account_screen.dart';
-import 'screens/about_screen.dart';
-import 'screens/word_categories_screen.dart';
 import 'widgets/bottom_navigation.dart';
 import 'models/theme_model.dart';
+import 'providers/statistics_provider.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => ThemeProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => ThemeProvider()),
+        ChangeNotifierProvider(create: (context) => StatisticsProvider()),
+      ],
       child: const MyApp(),
     ),
   );

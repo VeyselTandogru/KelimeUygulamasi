@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ingilizce_ogrenme_uygulamasi/screens/account_screen.dart';
 import '../utils/app_colors.dart';
 
 class AboutScreen extends StatelessWidget {
@@ -11,7 +12,12 @@ class AboutScreen extends StatelessWidget {
         title: const Text('Uygulamamız Hakkında'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AccountScreen()),
+            );
+          },
         ),
       ),
       body: SingleChildScrollView(
