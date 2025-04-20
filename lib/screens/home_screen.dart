@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ingilizce_ogrenme_uygulamasi/providers/statistics_provider.dart';
-import 'package:ingilizce_ogrenme_uygulamasi/screens/word_learn_screen.dart';
 import 'package:provider/provider.dart';
 import '../utils/app_colors.dart';
-import '../screens/word_repeat_screen.dart';
-import '../screens/word_categories_screen.dart';
 import '../routes/app_routes.dart';
 import '../widgets/app_scaffold.dart';
 

@@ -5,8 +5,7 @@ import '../models/theme_model.dart';
 import '../utils/app_constants.dart';
 import '../routes/app_routes.dart';
 import '../widgets/app_scaffold.dart';
-import 'about_screen.dart';
-import '../main.dart'; // NavigationUtil'i içe aktaralım
+// NavigationUtil'i içe aktaralım
 import '../providers/statistics_provider.dart'; // StatisticsProvider eklendi
 
 class AccountScreen extends StatefulWidget {

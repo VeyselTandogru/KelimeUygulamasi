@@ -80,15 +80,7 @@ class _WordLearnScreenState extends State<WordLearnScreen> {
                   children: [
                     Text(currentWord.word, style: textTheme.headlineLarge),
                     SizedBox(height: AppConstants.paddingSmall),
-                    Text(
-                      currentWord.pronunciation,
-                      style: textTheme.bodyMedium?.copyWith(
-                        color:
-                            Theme.of(context).brightness == Brightness.dark
-                                ? AppConstants.subtitleDarkColor
-                                : AppConstants.subtitleLightColor,
-                      ),
-                    ),
+
                     SizedBox(height: AppConstants.paddingSmall / 2),
                     Text(
                       currentWord.partOfSpeech,
