@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ingilizce_ogrenme_uygulamasi/providers/statistics_provider.dart';
 import 'package:provider/provider.dart';
+import '../services/selected_evel_services.dart';
 import '../utils/app_colors.dart';
 import '../routes/app_routes.dart';
 import '../widgets/app_scaffold.dart';
@@ -67,12 +68,31 @@ class _HomeScreenState extends State<HomeScreen> {
                             _buildMenuItem(
                               'Yeni Kelime Öğren',
                               Icons.add_circle_outline,
-                              onTap: () {
-                                // Route kullanarak kelime öğrenme sayfasına git
-                                Navigator.pushNamed(
-                                  context,
-                                  AppRoutes.wordLearn,
-                                );
+                              onTap: () async {
+                                final selectedLevel = await SelectedLevelService.getSelectedLevel();
+
+                                if (selectedLevel == null) {
+                                  // Seviye seçilmemiş, önce seviye seçimi ekranına git
+                                  final newSelectedLevel = await Navigator.pushNamed(
+                                    context,
+                                    AppRoutes.wordCategories,
+                                  );
+
+                                  if (newSelectedLevel != null && newSelectedLevel is String) {
+                                    Navigator.pushNamed(
+                                      context,
+                                      AppRoutes.wordLearn,
+                                      arguments: newSelectedLevel,
+                                    );
+                                  }
+                                } else {
+                                  // Seviye zaten seçili, doğrudan öğrenmeye geç
+                                  Navigator.pushNamed(
+                                    context,
+                                    AppRoutes.wordLearn,
+                                    arguments: selectedLevel,
+                                  );
+                                }
                               },
                             ),
                             const Divider(height: 1),

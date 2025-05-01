@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../utils/app_colors.dart';
 import '../routes/app_routes.dart';
+import '../services/repeat_words_service.dart'; // <<< Bunu ekledik
+import '../models/word_model.dart'; // <<< Bunu ekledik
 import '../widgets/app_scaffold.dart';
 
 class WordRepeatScreen extends StatefulWidget {
@@ -11,33 +13,47 @@ class WordRepeatScreen extends StatefulWidget {
 }
 
 class _WordRepeatScreenState extends State<WordRepeatScreen> {
-  // Örnek tekrar edilecek kelimeler
-  final List<Map<String, dynamic>> words = [
-    {'english': 'apple', 'turkish': 'elma', 'isRevealed': false},
-    {'english': 'book', 'turkish': 'kitap', 'isRevealed': false},
-    {'english': 'car', 'turkish': 'araba', 'isRevealed': false},
-    {'english': 'house', 'turkish': 'ev', 'isRevealed': false},
-    {'english': 'computer', 'turkish': 'bilgisayar', 'isRevealed': false},
-  ];
-
+  late List<Word> repeatWords;
   int currentIndex = 0;
   bool isAnswerRevealed = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // TEKRAR GÜNLERİ
+    List<int> repeatDays = [0, 1, 2, 4, 7, 14, 30];
+
+    repeatWords = RepeatWordsService.repeatWords.where((word) {
+      if (word.repeatStep >= repeatDays.length) {
+        return false; // tüm tekrarlar tamamlandı
+      }
+
+      final addedDate = word.addedDate;
+      final daysSinceAdded = DateTime.now().difference(addedDate).inDays;
+      return daysSinceAdded >= repeatDays[word.repeatStep];
+    }).toList();
+
+    if (repeatWords.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showNoWordsDialog();
+      });
+    }
+  }
 
   void revealAnswer() {
     setState(() {
       isAnswerRevealed = true;
-      words[currentIndex]['isRevealed'] = true;
     });
   }
 
   void nextWord() {
-    if (currentIndex < words.length - 1) {
+    if (currentIndex < repeatWords.length - 1) {
       setState(() {
         currentIndex++;
         isAnswerRevealed = false;
       });
     } else {
-      // Son kelimeye ulaşıldı, tüm kelimeleri tekrar et
       showCompletionDialog();
     }
   }
@@ -46,9 +62,16 @@ class _WordRepeatScreenState extends State<WordRepeatScreen> {
     if (currentIndex > 0) {
       setState(() {
         currentIndex--;
-        isAnswerRevealed = words[currentIndex]['isRevealed'];
+        isAnswerRevealed = repeatWords[currentIndex].isRevealed ?? false;
       });
     }
+  }
+
+  void resetWords() {
+    setState(() {
+      currentIndex = 0;
+      isAnswerRevealed = false;
+    });
   }
 
   void showCompletionDialog() {
@@ -69,10 +92,7 @@ class _WordRepeatScreenState extends State<WordRepeatScreen> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                Navigator.pushReplacementNamed(
-                  context,
-                  AppRoutes.home,
-                ); // Route kullanarak ana sayfaya dön
+                Navigator.pushReplacementNamed(context, AppRoutes.home);
               },
               child: const Text('Ana Sayfaya Dön'),
             ),
@@ -82,22 +102,39 @@ class _WordRepeatScreenState extends State<WordRepeatScreen> {
     );
   }
 
-  void resetWords() {
-    setState(() {
-      for (var word in words) {
-        word['isRevealed'] = false;
-      }
-      currentIndex = 0;
-      isAnswerRevealed = false;
-    });
+  void showNoWordsDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Tekrar Edilecek Kelime Yok'),
+          content: const Text('Henüz "Bilmiyorum" dediğiniz kelime yok.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, AppRoutes.home);
+              },
+              child: const Text('Ana Sayfaya Dön'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final currentWord = words[currentIndex];
+    if (repeatWords.isEmpty) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final currentWord = repeatWords[currentIndex];
+
     return AppScaffold(
       title: 'Kelime Tekrarı',
-      currentIndex: 2, // Tekrar sekmesi seçili
+      currentIndex: 2,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -107,78 +144,46 @@ class _WordRepeatScreenState extends State<WordRepeatScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: Text(
-                'Kelime ${currentIndex + 1}/${words.length}',
+                'Kelime ${currentIndex + 1}/${repeatWords.length}',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
             LinearProgressIndicator(
-              value: (currentIndex + 1) / words.length,
+              value: (currentIndex + 1) / repeatWords.length,
               backgroundColor: Colors.grey[300],
               valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
             ),
             const SizedBox(height: 32),
 
-            // Kelime kartı
             Expanded(
-              child: Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'İngilizce',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        currentWord['english'],
-                        style: const TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                      const Text(
-                        'Türkçe',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      if (isAnswerRevealed)
-                        Text(
-                          currentWord['turkish'],
-                          style: const TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      else
-                        ElevatedButton(
-                          onPressed: revealAnswer,
-                          child: const Text('Cevabı Göster'),
-                        ),
-                    ],
-                  ),
+              child: GestureDetector(
+                onTap: isAnswerRevealed ? null : revealAnswer,
+                child: TweenAnimationBuilder(
+                  tween: Tween<double>(
+                      begin: 0, end: isAnswerRevealed ? 1.0 : 0.0),
+                  duration: const Duration(milliseconds: 500),
+                  builder: (context, value, child) {
+                    final isUnder = value > 0.5;
+                    final rotationY = value * 3.1416; 
+
+                    return Transform(
+                      alignment: Alignment.center,
+                      transform: Matrix4.rotationY(rotationY),
+                      child: isUnder
+                          ? Transform(
+                              alignment: Alignment.center,
+                              transform: Matrix4.rotationY(3.1416),
+                              child: _buildBackCard(currentWord.translation),
+                            )
+                          : _buildFrontCard(currentWord.word),
+                    );
+                  },
                 ),
               ),
             ),
-
             const SizedBox(height: 24),
 
-            // Navigasyon butonları
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -195,6 +200,67 @@ class _WordRepeatScreenState extends State<WordRepeatScreen> {
                   color: isAnswerRevealed ? AppColors.primary : Colors.grey,
                 ),
               ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFrontCard(String word) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'İngilizce',
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              word,
+              style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            /*ElevatedButton(
+              onPressed: revealAnswer,
+              child: const Text('Cevabı Göster'),
+            ),*/
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBackCard(String translation) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Türkçe',
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              translation,
+              style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
             ),
           ],
         ),

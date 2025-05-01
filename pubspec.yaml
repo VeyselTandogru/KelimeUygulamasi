@@ -2,7 +2,7 @@ name: ingilizce_ogrenme_uygulamasi
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -19,8 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.7.2
-
+  sdk: ">=3.6.0 <4.0.0"
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
 # consider running `flutter pub upgrade --major-versions`. Alternatively,
@@ -37,6 +36,13 @@ dependencies:
   provider: ^6.1.4
   shared_preferences: ^2.2.2
 
+  flutter_rating_bar: ^4.0.0
+  url_launcher: ^6.1.7
+  share_plus: ^7.2.1
+  flutter_card_swiper: ^7.0.0
+  swipe_cards: ^2.0.0
+
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -53,11 +59,9 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
   uses-material-design: true
+  assets:
+    - assets/merged.json
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

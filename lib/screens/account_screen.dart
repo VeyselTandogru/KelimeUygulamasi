@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../widgets/accordion_item.dart';
 import '../models/theme_model.dart';
 import '../utils/app_constants.dart';
 import '../routes/app_routes.dart';
 import '../widgets/app_scaffold.dart';
 // NavigationUtil'i içe aktaralım
-import '../providers/statistics_provider.dart'; // StatisticsProvider eklendi
+import '../providers/statistics_provider.dart';
+import 'app_action_dialog.dart'; // StatisticsProvider eklendi
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -239,7 +241,10 @@ class _AccountScreenState extends State<AccountScreen> {
                     Icons.star,
                     color: Colors.amber,
                     onTap: () {
-                      // Uygulama mağazasına yönlendir
+                      showDialog(
+                        context: context,
+                        builder: (context) => const Scoring(), // Oy verme diyalogunu aç
+                      );
                     },
                   ),
                   const Divider(height: 1),
@@ -247,7 +252,10 @@ class _AccountScreenState extends State<AccountScreen> {
                     'Uygulamayı Paylaş',
                     Icons.share,
                     onTap: () {
-                      // Paylaşım sayfasını aç
+                      Share.share(
+                        'Bu harika uygulamayı mutlaka denemelisin! 📚✨\nhttps://play.google.com/store/apps/details?id=com.example.yourapp',
+                        subject: 'İngilizce Öğrenme Uygulaması',
+                      );
                     },
                   ),
                 ],

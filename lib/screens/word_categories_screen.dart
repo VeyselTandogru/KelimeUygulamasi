@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import '../services/selected_evel_services.dart';
 import '../utils/app_colors.dart';
-import '../routes/app_routes.dart';
 import '../services/categories_service.dart';
 import '../widgets/app_scaffold.dart';
+import 'dart:convert';
+import 'package:flutter/services.dart' show rootBundle;
 
 class WordCategoriesScreen extends StatefulWidget {
   const WordCategoriesScreen({super.key});
@@ -16,55 +18,80 @@ class _WordCategoriesScreenState extends State<WordCategoriesScreen> {
   final CategoriesService _categoriesService = CategoriesService();
 
   // Kategori listesi
+  // Şimdilik mevsim gün ay zaman kaldırdım
   final List<Map<String, dynamic>> categories = [
     {
       'name': 'Oxford - A1',
-      'count': 340,
+      'level': 'A1',
       'color': Colors.green.shade200,
       'isSelected': false,
     },
     {
       'name': 'Oxford - A2',
-      'count': 280,
+      'level': 'A2',
       'color': Colors.red.shade200,
       'isSelected': false,
     },
     {
       'name': 'Oxford - B1',
-      'count': 120,
+      'level': 'B1',
       'color': Colors.cyan.shade200,
       'isSelected': false,
     },
     {
       'name': 'Oxford - B2',
-      'count': 130,
+      'level': 'B2',
       'color': Colors.blue.shade200,
       'isSelected': false,
     },
     {
-      'name': 'Günler ve Aylar',
-      'count': 19,
+      'name': 'Oxford - C1',
+      'level': 'C1',
+      'color': Colors.purple.shade200,
+      'isSelected': false,
+    },
+    {
+      'name': 'Oxford - C2',
+      'level': 'C2',
+      'color': Colors.deepPurple.shade200,
+      'isSelected': false,
+    },
+    {
+      'name': 'Günler',
+      'level': 'Gün',
+      'color': Colors.orange.shade200,
+      'isSelected': false,
+    },
+    {
+      'name': 'Aylar',
+      'level': 'Ay',
       'color': Colors.amber.shade200,
       'isSelected': false,
     },
     {
-      'name': 'Mevsimler',
-      'count': 4,
-      'color': Colors.lightGreen.shade200,
+      'name': 'Yıllar',
+      'level': 'Yıl',
+      'color': Colors.teal.shade200,
       'isSelected': false,
     },
     {
-      'name': 'Zaman',
-      'count': 34,
+      'name': 'Zaman Kavramları',
+      'level': 'Zaman',
       'color': Colors.pink.shade200,
       'isSelected': false,
     },
+    {
+      'name': 'Mevsimler',
+      'level': 'Mevsim',
+      'color': Colors.lightGreen.shade200,
+      'isSelected': false,
+    },
   ];
-
   @override
   void initState() {
     super.initState();
     _loadSavedCategories();
+    _loadWordCountsFromJson(); // <<< YENİ FONKSİYON
   }
 
   // Kaydedilmiş kategori seçimlerini yükle
@@ -84,26 +111,58 @@ class _WordCategoriesScreenState extends State<WordCategoriesScreen> {
     }
   }
 
+  Future<void> _loadWordCountsFromJson() async {
+    final String jsonString = await rootBundle.loadString('assets/merged.json');
+    final List<dynamic> jsonData = json.decode(jsonString);
+
+    // Her level için kaç kelime var onu hesapla
+    Map<String, int> levelCounts = {};
+
+    for (var item in jsonData) {
+      final level = item['turkceKategori'] as String?;
+      if (level != null) {
+        levelCounts[level] = (levelCounts[level] ?? 0) + 1;
+      }
+    }
+
+    // Şimdi categories listesindeki count'ları güncelle
+    setState(() {
+      for (var category in categories) {
+        final level = category['level'] as String;
+        category['count'] = levelCounts[level] ?? 0;
+      }
+    });
+  }
+
   // Kategori seçimlerini kaydet
   void _saveSelectedCategories() {
     _categoriesService.saveSelectedCategories(categories);
   }
 
   int get selectedCount => categories.where((cat) => cat['isSelected']).length;
-  int get totalWordCount {
-    int total = 0;
-    for (var category in categories) {
-      if (category['isSelected']) {
-        total += category['count'] as int;
-      }
-    }
-    return total;
+  int get totalWordCount => categories.fold(0, (total, category) {
+  if (category['isSelected'] == true) {
+    return total + (category['count'] ?? 0) as int;
   }
+  return total;
+}); /*
+  void toggleCategory(int index) {
+    setState(() {
+      categories[index]['isSelected'] = !(categories[index]['isSelected'] as bool);
+      _saveSelectedCategories();
+    });
+  }*/
 
   void toggleCategory(int index) {
     setState(() {
-      categories[index]['isSelected'] = !categories[index]['isSelected'];
-      // Seçim değiştiğinde kaydet
+      // Önce tüm seçimleri temizle
+      for (var i = 0; i < categories.length; i++) {
+        categories[i]['isSelected'] = false;
+      }
+      // Sadece tıklananı seç
+      categories[index]['isSelected'] = true;
+
+      // Seçimi kaydet
       _saveSelectedCategories();
     });
   }
@@ -132,8 +191,8 @@ class _WordCategoriesScreenState extends State<WordCategoriesScreen> {
                 child: ListView.separated(
                   padding: const EdgeInsets.all(16.0),
                   itemCount: categories.length,
-                  separatorBuilder:
-                      (context, index) => const Divider(height: 1),
+                  separatorBuilder: (context, index) =>
+                      const Divider(height: 1),
                   itemBuilder: (context, index) {
                     final category = categories[index];
                     return _buildCategoryItem(category, index);
@@ -147,21 +206,18 @@ class _WordCategoriesScreenState extends State<WordCategoriesScreen> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
-              onPressed:
-                  selectedCount > 0
-                      ? () {
-                        // Seçilen kategorilerle öğrenmeyi başlat
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              '$selectedCount kategori ile başlatılıyor',
-                            ),
-                            backgroundColor: AppColors.primary,
-                          ),
-                        );
-                        Navigator.pushNamed(context, AppRoutes.home);
-                      }
-                      : null,
+              onPressed: selectedCount > 0
+                  ? () async {
+                      final selectedCategory =
+                          categories.firstWhere((cat) => cat['isSelected']);
+                      final selectedLevel = selectedCategory['level'];
+
+                      await SelectedLevelService.setSelectedLevel(
+                          selectedLevel); // Seçimi kaydet
+                      Navigator.pop(
+                          context, selectedLevel); // Seçimi geri döndür
+                    }
+                  : null,
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12.0),
                 child: Text(
