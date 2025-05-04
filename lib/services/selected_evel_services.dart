@@ -17,4 +17,16 @@ class SelectedLevelService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_selectedLevelKey);
   }
+
+  static Future<String> getOrSetDefaultLevel() async {
+    final prefs = await SharedPreferences.getInstance();
+    final selected = prefs.getString(_selectedLevelKey);
+
+    if (selected == null) {
+      await prefs.setString(_selectedLevelKey, "A1");
+      return "A1";
+    } else {
+      return selected;
+    }
+  }
 }

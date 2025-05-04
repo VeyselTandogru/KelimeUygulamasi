@@ -21,12 +21,11 @@ class _WordRepeatScreenState extends State<WordRepeatScreen> {
   void initState() {
     super.initState();
 
-    // TEKRAR GÜNLERİ
     List<int> repeatDays = [0, 1, 2, 4, 7, 14, 30];
 
     repeatWords = RepeatWordsService.repeatWords.where((word) {
       if (word.repeatStep >= repeatDays.length) {
-        return false; // tüm tekrarlar tamamlandı
+        return false;
       }
 
       final addedDate = word.addedDate;
@@ -47,7 +46,18 @@ class _WordRepeatScreenState extends State<WordRepeatScreen> {
     });
   }
 
-  void nextWord() {
+  void nextWord() async {
+    final word = repeatWords[currentIndex];
+    word.repeatStep += 1;
+    word.addedDate = DateTime.now();
+
+    const repeatDays = [0, 1, 2, 4, 7, 14, 30];
+
+    if (word.repeatStep >= repeatDays.length) {
+      await RepeatWordsService.deleteWord(word);
+    } else {
+      await RepeatWordsService.updateWord(word);
+    }
     if (currentIndex < repeatWords.length - 1) {
       setState(() {
         currentIndex++;
@@ -206,65 +216,130 @@ class _WordRepeatScreenState extends State<WordRepeatScreen> {
       ),
     );
   }
-
   Widget _buildFrontCard(String word) {
+    final current = repeatWords[currentIndex];
+
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 6,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'İngilizce',
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              word,
-              style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-            /*ElevatedButton(
-              onPressed: revealAnswer,
-              child: const Text('Cevabı Göster'),
-            ),*/
-          ],
+        padding: const EdgeInsets.all(20.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 8),
+              Center(
+                child: Text(
+                  word,
+                  style: const TextStyle(
+                    fontSize: 36,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.teal,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              Text(
+                '📘 Gramer Türü',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 18,
+                  color: Colors.grey[800],
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                current.partOfSpeech,
+                style: TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+
+              const SizedBox(height: 20),
+
+              Text(
+                '📝 İngilizce Örnekler',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 18,
+                  color: Colors.grey[800],
+                ),
+              ),
+              const SizedBox(height: 6),
+              ...current.examples.map((e) => Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Text('• $e',
+                    style: const TextStyle(fontSize: 16, color: Colors.black87)),
+              )),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildBackCard(String translation) {
+    final current = repeatWords[currentIndex];
+
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 6,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Türkçe',
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              translation,
-              style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-          ],
+        padding: const EdgeInsets.all(20.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 8),
+              Center(
+                child: Text(
+                  translation,
+                  style: const TextStyle(
+                    fontSize: 36,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.teal,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              Text(
+                '📖 Açıklama',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 18,
+                  color: Colors.grey[800],
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                current.meaning,
+                style: const TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+
+              const SizedBox(height: 20),
+
+              Text(
+                '🇹🇷 Türkçe Örnekler',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 18,
+                  color: Colors.grey[800],
+                ),
+              ),
+              const SizedBox(height: 6),
+              ...current.turkishExamples.map((e) => Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Text('• $e',
+                    style: const TextStyle(fontSize: 16, color: Colors.black87)),
+              )),
+            ],
+          ),
         ),
       ),
     );
   }
 }
+

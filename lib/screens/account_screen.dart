@@ -54,7 +54,7 @@ class _AccountScreenState extends State<AccountScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Kullanıcı bilgileri bölümü
-              _buildSection(
+             /* _buildSection(
                 children: [
                   AccordionItem(
                     title: 'Kullanıcı Adı',
@@ -132,7 +132,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     ),
                   ),
                 ],
-              ),
+              ),*/
 
               SizedBox(height: AppConstants.paddingMedium),
 

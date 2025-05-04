@@ -3,8 +3,11 @@ import 'package:provider/provider.dart';
 import 'models/theme_model.dart';
 import 'providers/statistics_provider.dart';
 import 'routes/app_routes.dart';
+import 'services/repeat_words_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await RepeatWordsService.init();
   runApp(
     MultiProvider(
       providers: [

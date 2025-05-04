@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../models/theme_model.dart';
 import '../services/selected_evel_services.dart';
 import '../utils/app_colors.dart';
 import '../services/categories_service.dart';
@@ -49,7 +51,7 @@ class _WordCategoriesScreenState extends State<WordCategoriesScreen> {
       'level': 'C1',
       'color': Colors.purple.shade200,
       'isSelected': false,
-    },
+    },/*
     {
       'name': 'Oxford - C2',
       'level': 'C2',
@@ -85,20 +87,18 @@ class _WordCategoriesScreenState extends State<WordCategoriesScreen> {
       'level': 'Mevsim',
       'color': Colors.lightGreen.shade200,
       'isSelected': false,
-    },
+    },*/
   ];
   @override
   void initState() {
     super.initState();
     _loadSavedCategories();
-    _loadWordCountsFromJson(); // <<< YENİ FONKSİYON
+    _loadWordCountsFromJson();
   }
 
-  // Kaydedilmiş kategori seçimlerini yükle
   Future<void> _loadSavedCategories() async {
     final selectedNames = await _categoriesService.getSelectedCategories();
 
-    // Mevcut listedeki kategorileri kayıtlı seçimlere göre güncelle
     if (selectedNames.isNotEmpty) {
       setState(() {
         for (var i = 0; i < categories.length; i++) {
@@ -115,7 +115,6 @@ class _WordCategoriesScreenState extends State<WordCategoriesScreen> {
     final String jsonString = await rootBundle.loadString('assets/merged.json');
     final List<dynamic> jsonData = json.decode(jsonString);
 
-    // Her level için kaç kelime var onu hesapla
     Map<String, int> levelCounts = {};
 
     for (var item in jsonData) {
@@ -125,7 +124,6 @@ class _WordCategoriesScreenState extends State<WordCategoriesScreen> {
       }
     }
 
-    // Şimdi categories listesindeki count'ları güncelle
     setState(() {
       for (var category in categories) {
         final level = category['level'] as String;
@@ -134,7 +132,6 @@ class _WordCategoriesScreenState extends State<WordCategoriesScreen> {
     });
   }
 
-  // Kategori seçimlerini kaydet
   void _saveSelectedCategories() {
     _categoriesService.saveSelectedCategories(categories);
   }
@@ -236,57 +233,74 @@ class _WordCategoriesScreenState extends State<WordCategoriesScreen> {
       ),
     );
   }
-
   Widget _buildSelectedInfo() {
-    return Container(
-      margin: const EdgeInsets.all(16.0),
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        final isDark = themeProvider.isDarkMode;
+        final theme = Theme.of(context);
+
+        return Container(
+          margin: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+            borderRadius: BorderRadius.circular(16.0),
+            boxShadow: [
+              BoxShadow(
+                color: isDark
+                    ? Colors.black.withOpacity(0.5)
+                    : Colors.grey.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.edit, color: AppColors.primary, size: 24.0),
-          ),
-          const SizedBox(width: 16.0),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '$selectedCount kategori seçildi',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textLight,
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12.0),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: isDark
+                        ? [theme.primaryColor.withOpacity(0.4), theme.primaryColor.withOpacity(0.2)]
+                        : [theme.primaryColor.withOpacity(0.15), theme.primaryColor.withOpacity(0.05)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
+                  shape: BoxShape.circle,
                 ),
-                Text(
-                  'Toplam kelime sayısı: $totalWordCount',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textLightSubtitle,
-                  ),
+                child: Icon(
+                  Icons.edit,
+                  size: 24.0,
+                  color:  isDark ? Colors.purple : theme.primaryColor,
+
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 16.0),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$selectedCount kategori seçildi',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Toplam kelime sayısı: $totalWordCount',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: isDark ? Colors.grey[300] : Colors.grey[700],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
